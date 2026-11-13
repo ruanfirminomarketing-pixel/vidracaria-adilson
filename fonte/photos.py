@@ -1,0 +1,52 @@
+# Fotos reais (banco de imagens Pexels — licença gratuita para uso comercial).
+# Provisórias até chegarem as fotos dos trabalhos da Vidraçaria do Adilson.
+PHOTOS = {
+ "box-para-banheiro": [(7005268, "Box de vidro temperado em banheiro moderno com bancada e espelho"),
+                       (6436801, "Box de canto em vidro temperado em banheiro claro"),
+                       (7005460, "Box de vidro com porta de abrir em banheiro de apartamento")],
+ "box-blindex": [(19846356, "Box de vidro temperado sem moldura em banheiro com revestimento claro"),
+                 (9562379, "Box de canto com portas de vidro temperado em banheiro revestido"),
+                 (4258278, "Box de vidro temperado com portas de correr em banheiro de mármore")],
+ "espelhos-sob-medida": [(6835173, "Espelhos sob medida sobre bancada dupla de banheiro"),
+                         (6585624, "Espelho redondo decorativo na parede da sala de estar"),
+                         (3992850, "Espelhos de parede em salão de beleza")],
+ "portas-de-vidro": [(7638806, "Portas de vidro temperado na entrada de um prédio comercial"),
+                     (6008847, "Porta de vidro aberta em sala de reunião de escritório"),
+                     (8134753, "Portas de vidro de correr ligando a sala à área da piscina")],
+ "janelas-de-vidro": [(3935315, "Sala com janelas amplas de vidro e muita luz natural"),
+                      (2747901, "Quarto com janela grande de vidro"),
+                      (5691515, "Profissional instalando janela de vidro")],
+ "guarda-corpo-de-vidro": [(7078471, "Escada interna com guarda-corpo de vidro"),
+                           (6933770, "Terraço com guarda-corpo de vidro e corrimão metálico"),
+                           (12029115, "Prédio residencial com varandas e guarda-corpo de vidro")],
+ "envidracamento-de-sacadas": [(8345720, "Fachada de prédio com sacadas envidraçadas"),
+                               (35085361, "Prédio de apartamentos com sacadas de vidro"),
+                               (13812522, "Edifício alto com sacadas de vidro em todos os andares")],
+ "fechamento-de-varandas": [(5900792, "Varanda fechada com janelas amplas de vidro"),
+                            (4030023, "Varanda fechada com painéis de vidro e vista para o jardim"),
+                            (8583601, "Varanda envidraçada com portas de vidro e poltronas")],
+ "vidros-temperados": [(11499130, "Vidro temperado trincado em pequenos fragmentos de segurança"),
+                       (7219188, "Chapa de vidro sobre superfície, mostrando a espessura"),
+                       (5483051, "Escritório com paredes de vidro temperado")],
+ "vidros-laminados": [(14412579, "Escada externa com guarda-corpo em vidro laminado"),
+                      (34048291, "Instalação de painel de vidro em fachada"),
+                      (10135334, "Escada interna com guarda-corpo de vidro laminado")],
+ "divisorias-de-vidro": [(8971808, "Escritório com divisórias de vidro"),
+                         (260689, "Sala de reunião com paredes de vidro"),
+                         (8477485, "Corredor de escritório com divisórias de vidro")],
+ "tampos-de-mesa-de-vidro": [(7147295, "Mesa de jantar redonda com tampo de vidro"),
+                             (7195559, "Sala de jantar com mesa de tampo de vidro"),
+                             (17001794, "Mesa de centro com tampo de vidro na sala de estar")],
+ "instalacao-de-vidros": [(5691531, "Profissional montando janela de vidro"),
+                          (34048291, "Instalação de painel de vidro com elevador em obra"),
+                          (5691521, "Vidraceiro fixando esquadria de janela")],
+ "manutencao-de-vidros": [(5768188, "Ajuste de janela com chave de fenda"),
+                          (5691518, "Ajuste de dobradiça em esquadria de janela"),
+                          (7219181, "Corte de vidro com cortador profissional")],
+}
+EXTRA = {
+ "espelhos-sob-medida-campo-grande": (11593505, "Parede espelhada em academia"),
+}
+
+def pex(pid, w, h):
+    return f"https://images.pexels.com/photos/{pid}/pexels-photo-{pid}.jpeg?auto=compress&cs=tinysrgb&w={w}&h={h}&fit=crop"
