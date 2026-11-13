@@ -489,7 +489,12 @@ HOME_FAQ = [
 
 def build_home():
     cur = ''
-    allsvc = svc_cards(cur, [s['slug'] for s in SERVICES])
+    MAIN = ['box-para-banheiro', 'espelhos-sob-medida', 'portas-de-vidro', 'janelas-de-vidro', 'guarda-corpo-de-vidro', 'envidracamento-de-sacadas']
+    allsvc = (f'<div class="grid g3">{svc_cards(cur, MAIN)}</div>'
+              f'<div class="grid g3 more-svc" id="mais-servicos">{svc_cards(cur, [s["slug"] for s in SERVICES if s["slug"] not in MAIN])}</div>'
+              f'<div class="ctas" style="justify-content:center"><button class="btn btn-navy" type="button" data-more="mais-servicos" aria-expanded="false" aria-controls="mais-servicos">Ver todos os serviços ({len(SERVICES)})</button></div>')
+    obras = (f'<section class="sec"><div class="wrap"><span class="kicker">Serviços realizados</span><h2>Trabalhos feitos pela Vidraçaria do Adilson</h2>{obras_carousel(cur, 10)}'
+             f'<p style="margin-top:18px"><a href="{href(cur, "servicos-realizados")}">Ver todos os serviços realizados →</a></p></div></section>') if PROJECTS else ''
     steps = [('Fale com a gente', 'Chame no WhatsApp ou ligue para (21) 98757-6554 e conte o que precisa.'),
              ('Envie fotos e medidas', 'Com fotos e medidas aproximadas, já fazemos uma estimativa.'),
              ('Medição no local', 'Conferimos as medidas exatas, o prumo e o nível no seu endereço.'),
@@ -512,7 +517,8 @@ def build_home():
 <p>Cada projeto começa por entender o que você precisa e medir o espaço com precisão, para indicar o vidro certo — temperado, laminado ou comum — de acordo com o uso e com as normas técnicas.</p>
 <p><a href="{href(cur, "sobre-nos")}">Conheça a Vidraçaria do Adilson →</a></p></div>
 <div class="grid g2">{df}</div></div></section>
-<section class="sec alt" id="servicos"><div class="wrap"><span class="kicker">Serviços</span><h2>Serviços de vidraçaria no Rio de Janeiro</h2><p>Escolha o serviço para ver detalhes, tipos de vidro, perguntas frequentes e pedir orçamento.</p><div class="grid g3">{allsvc}</div></div></section>
+<section class="sec alt" id="servicos"><div class="wrap"><span class="kicker">Serviços</span><h2>Serviços de vidraçaria no Rio de Janeiro</h2><p>Escolha o serviço para ver detalhes, tipos de vidro, perguntas frequentes e pedir orçamento.</p>{allsvc}</div></section>
+{obras}
 <section class="sec"><div class="wrap"><span class="kicker">Como funciona</span><h2>Do orçamento à instalação</h2><div class="grid g4">{st}</div><div class="ctas">{btn_wa(SITE["wa_default"], "como_funciona")}{btn_call("como_funciona")}</div></div></section>
 <section class="sec alt"><div class="wrap"><span class="kicker">Galeria</span><h2>Projetos em vidro</h2><div class="gal">{gal}</div><p class="note">Fotos ilustrativas de banco de imagens.</p></div></section>
 {locs_block(cur)}
@@ -575,33 +581,47 @@ def build_contato():
     ld = [crumbs_ld(trail), {"@type": "ContactPage", "about": {"@id": ORG_ID}}]
     page(cur, 'Contato e Orçamento | (21) 98757-6554 | Vidraçaria do Adilson', 'Peça orçamento à Vidraçaria do Adilson pelo WhatsApp ou ligue (21) 98757-6554. Atendemos toda a cidade do Rio de Janeiro.', body, ld, None, 'contato')
 
+def obra_bairro(pj):
+    if pj.get('bairro') in BRR: return BRR[pj['bairro']]
+    nome = pj.get('local', '').split(' - ')[0].strip().lower()
+    return next((b for b in BRR.values() if b['name'].lower() == nome), None)
+
+def obras_carousel(cur, limit=None, heading='h3'):
+    slides = ''
+    for i, pj in enumerate(PROJECTS[:limit] if limit else PROJECTS):
+        sv, br = SVC[pj['service']], obra_bairro(pj)
+        f, alt = pj['photos'][0]
+        loc = pj.get('local') or (br['name'] + ' - Rio de Janeiro' if br else 'Rio de Janeiro')
+        loc_html = f'<a href="{href(cur, br["slug"])}">{esc(loc)}</a>' if br else esc(loc)
+        slides += (f'<article class="slide" id="{pj["slug"]}"><figure><img src="{asset(cur, "assets/img/obras/" + f)}" alt="{esc(alt)}" width="1200" height="900" loading="{"eager" if i == 0 and limit is None else "lazy"}" decoding="async"></figure>'
+                   f'<div class="slide-tx"><span class="tag">{esc(sv["name"])}</span><{heading}>{esc(pj["title"])}</{heading}>'
+                   f'<p class="loc"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/></svg>{loc_html}</p>'
+                   + (f'<p>{esc(pj["desc"])}</p>' if pj.get('desc') else '') +
+                   f'<a class="more" href="{href(cur, sv["slug"])}">Ver {esc(sv["name"].lower())} →</a></div></article>')
+    return (f'<div class="car" data-car><button class="car-btn prev" type="button" aria-label="Trabalho anterior">‹</button>'
+            f'<div class="car-track" tabindex="0" aria-label="Serviços realizados">{slides}</div>'
+            f'<button class="car-btn next" type="button" aria-label="Próximo trabalho">›</button><div class="car-dots" aria-hidden="true"></div></div>')
+
 def build_portfolio():
     cur = 'servicos-realizados/'
     trail = [('', 'Início'), ('servicos-realizados', 'Serviços realizados')]
-    items, ld_items = '', []
-    for i, pj in enumerate(PROJECTS):
-        sv, br = SVC[pj['service']], BRR.get(pj.get('bairro', ''))
-        figs = ''.join(f'<figure><img src="{asset(cur, "assets/img/obras/" + f)}" alt="{esc(alt)}" width="1200" height="900" loading="{"eager" if i == 0 and k == 0 else "lazy"}" decoding="async"></figure>'
-                       for k, (f, alt) in enumerate(pj['photos']))
-        where = f' em <a href="{href(cur, br["slug"])}">{esc(br["name"])}</a> (Rio de Janeiro - RJ)' if br else ' no Rio de Janeiro (RJ)'
-        det = ''.join(f'<li>{esc(x)}</li>' for x in pj.get('details', []))
-        items += (f'<article class="obra" id="{pj["slug"]}"><div class="obra-fotos">{figs}</div><div class="obra-tx">'
-                  f'<span class="tag">{esc(sv["name"])}</span><h2>{esc(pj["title"])}</h2>'
-                  f'<p class="post-meta">Serviço realizado{where}</p><p>{esc(pj["desc"])}</p>'
-                  + (f'<ul class="check">{det}</ul>' if det else '') +
-                  f'<p><a href="{href(cur, sv["slug"])}">Ver o serviço de {esc(sv["name"].lower())} →</a></p></div></article>')
-        ld_items.append({"@type": "CreativeWork", "name": pj['title'], "description": pj['desc'], "about": {"@type": "Service", "name": sv['name']},
+    ld_items = []
+    for pj in PROJECTS:
+        sv, br = SVC[pj['service']], obra_bairro(pj)
+        ld_items.append({"@type": "CreativeWork", "name": pj['title'], "description": pj.get('desc', ''), "about": {"@type": "Service", "name": sv['name']},
                          "creator": {"@id": ORG_ID}, "url": SITE['url'] + '/' + cur + '#' + pj['slug'],
                          "contentLocation": place(br['name']) if br else RIO,
                          "image": [{"@type": "ImageObject", "contentUrl": SITE['url'] + '/assets/img/obras/' + f, "caption": alt} for f, alt in pj['photos']]})
-    if not items:
+    if PROJECTS:
+        items = f'<span class="kicker">Galeria</span><h2>Trabalhos feitos pela nossa equipe</h2>{obras_carousel(cur)}'
+    else:
         items = (f'<div class="card" style="text-align:center;padding:40px"><h2>Fotos dos nossos trabalhos em breve</h2>'
                  f'<p>Estamos reunindo as fotos dos serviços realizados em Santíssimo, Campo Grande, Bangu e em todo o Rio de Janeiro.</p>'
                  f'<div class="ctas" style="justify-content:center">{btn_wa(SITE["wa_default"], "obras")}</div></div>')
     body = f'''<section class="hero hero-c"><div class="wrap"><div>{crumbs_html(cur, trail)}<span class="kicker">Portfólio</span><h1>Serviços realizados pela Vidraçaria do Adilson</h1>
 <p class="lead">Box, espelhos, portas, janelas, guarda-corpos e outros trabalhos em vidro feitos pela nossa equipe em Santíssimo, Campo Grande, Bangu e em toda a cidade do Rio de Janeiro (RJ).</p>
 <div class="ctas">{btn_wa(SITE["wa_default"], "hero")}{btn_call("hero", "Ligar agora")}</div></div></div></section>
-<section class="sec"><div class="wrap obras">{items}</div></section>
+<section class="sec"><div class="wrap">{items}</div></section>
 {cta_band(cur, SITE["wa_default"], "Quer um trabalho assim na sua casa ou empresa?")}'''
     ld = [crumbs_ld(trail), {"@type": "CollectionPage", "name": "Serviços realizados", "about": {"@id": ORG_ID}},
           {"@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": i + 1, "item": x} for i, x in enumerate(ld_items)]}]
@@ -638,9 +658,8 @@ LOGO_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logo')
 for f in os.listdir(LOGO_DIR):
     shutil.copy(os.path.join(LOGO_DIR, f), os.path.join(OUT, 'assets/img', f))
 if os.path.exists(os.path.join(OUT, 'assets/img', 'og.png')): os.remove(os.path.join(OUT, 'assets/img', 'og.png'))
-# fotos dos serviços realizados (já otimizadas em fonte/obras)
 OBRAS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'obras')
-if os.listdir(OBRAS):
+if any(f.endswith('.webp') for f in os.listdir(OBRAS)):
     os.makedirs(os.path.join(OUT, 'assets/img/obras'), exist_ok=True)
     for f in os.listdir(OBRAS):
         if f.endswith('.webp'): shutil.copy(os.path.join(OBRAS, f), os.path.join(OUT, 'assets/img/obras', f))
@@ -707,4 +726,4 @@ open(os.path.join(OUT, '_headers'), 'w').write('''/*
   X-Robots-Tag: noindex
 ''')
 print(f'{len(PAGES)} páginas, {len(SITEMAP)} no sitemap')
-json.dump({'pages': list(PAGES), 'sitemap': SITEMAP, 'services': [s['slug'] for s in SERVICES]}, open(os.path.join(os.path.dirname(OUT.rstrip('/')), 'manifest-' + ('prev' if PREVIEW else 'prod') + '.json'), 'w'))
+0 and json.dump({'pages': list(PAGES), 'sitemap': SITEMAP, 'services': [s['slug'] for s in SERVICES]}, open(os.path.join(os.path.dirname(OUT.rstrip('/')), 'manifest-' + ('prev' if PREVIEW else 'prod') + '.json'), 'w'))

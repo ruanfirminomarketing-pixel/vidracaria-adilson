@@ -22,6 +22,16 @@
   function setDr(o){dr.classList.toggle('open',o);ob.setAttribute('aria-expanded',o);d.body.style.overflow=o?'hidden':'';if(o)dr.querySelector('.x').focus()}
   if(dr&&ob){ob.addEventListener('click',function(){setDr(true)});dr.querySelector('.x').addEventListener('click',function(){setDr(false)});
     dr.addEventListener('click',function(e){if(e.target===dr)setDr(false)});d.addEventListener('keydown',function(e){if(e.key==='Escape')setDr(false)});}
+  // ver todos os serviços
+  d.querySelectorAll('[data-more]').forEach(function(b){b.addEventListener('click',function(){var t=d.getElementById(b.dataset.more),o=t.classList.toggle('open');b.setAttribute('aria-expanded',o);b.textContent=o?'Mostrar menos':b.dataset.label;if(!o)d.getElementById('servicos').scrollIntoView()});b.dataset.label=b.textContent});
+  // carrossel
+  d.querySelectorAll('[data-car]').forEach(function(c){var t=c.querySelector('.car-track'),pv=c.querySelector('.prev'),nx=c.querySelector('.next'),dots=c.querySelector('.car-dots');
+    function step(){var s=t.querySelector('.slide');return s?s.getBoundingClientRect().width+18:t.clientWidth}
+    function pages(){return Math.max(1,Math.ceil((t.scrollWidth-4)/t.clientWidth))}
+    function build(){dots.innerHTML='';for(var i=0;i<pages();i++){var b=d.createElement('button');b.type='button';b.setAttribute('aria-label','Página '+(i+1));(function(i){b.addEventListener('click',function(){t.scrollTo({left:i*t.clientWidth})})})(i);dots.appendChild(b)}upd()}
+    function upd(){var p=Math.round(t.scrollLeft/t.clientWidth);[].forEach.call(dots.children,function(b,i){b.classList.toggle('on',i===p)});pv.disabled=t.scrollLeft<5;nx.disabled=t.scrollLeft+t.clientWidth>=t.scrollWidth-5}
+    pv.addEventListener('click',function(){t.scrollBy({left:-step()})});nx.addEventListener('click',function(){t.scrollBy({left:step()})});
+    t.addEventListener('scroll',function(){w.requestAnimationFrame(upd)},{passive:true});w.addEventListener('resize',build);build();});
   // filtro do blog
   var fb=d.querySelectorAll('.filters button');fb.forEach(function(b){b.addEventListener('click',function(){var c=b.dataset.cat;fb.forEach(function(x){x.setAttribute('aria-pressed',x===b)});
     d.querySelectorAll('[data-cat]').forEach(function(p){if(p.tagName!=='BUTTON')p.hidden=!(c==='*'||p.dataset.cat===c)})})});
